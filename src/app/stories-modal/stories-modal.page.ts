@@ -194,15 +194,16 @@ export class StoriesModalPage implements OnInit {
           }
         }
 
-        const zFactor =
-          swiper.browser.isSafari || swiper.browser.isUiWebView
-            ? -swiperSize / 2
-            : 0;
+        // ドラッグ開始時にはcubeを少し後ろに倒す
+        const zFactor = this.isDrag ? -70 : 0;
         $wrapperEl.transform(
           `translate3d(0px,0,${zFactor}px) rotateX(${
             swiper.isHorizontal() ? 0 : wrapperRotate
           }deg) rotateY(${swiper.isHorizontal() ? -wrapperRotate : 0}deg)`
         );
+
+        // ドラッグ開始時と終わるときでアニメーションスピードを変える
+        $el.find('.swiper-wrapper').transition(this.isDrag ? 100 : 300);
       },
       setTransition: (duration): void => {
         const swiper: any = this.element.el.swiper;
@@ -219,7 +220,17 @@ export class StoriesModalPage implements OnInit {
       },
     },
   };
+
+  isDrag: boolean; // ドラッグ中からの取得
+
   constructor() {}
 
   ngOnInit() {}
+
+  slideStart() {
+    this.isDrag = true;
+  }
+  slideEnd() {
+    this.isDrag = false;
+  }
 }

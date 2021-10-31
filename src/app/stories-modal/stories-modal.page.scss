@@ -5,4 +5,8 @@ ion-slides {
     background-color: #fff;
     color: #000;
   }
+
+  .swiper-wrapper {
+    transition-duration: 200ms;
+  }
 }
