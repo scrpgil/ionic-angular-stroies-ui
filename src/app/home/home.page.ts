@@ -14,7 +14,7 @@ export class HomePage {
     const modal = await this.modalController.create({
       component: StoriesModalPage,
       swipeToClose: true,
-      presentingElement: await this.modalController.getTop(),
+      // presentingElement: await this.modalController.getTop(),
     });
     return await modal.present();
   }
