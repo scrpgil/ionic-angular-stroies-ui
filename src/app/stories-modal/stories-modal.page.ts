@@ -1,4 +1,6 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { IonSlides, ModalController, NavParams } from '@ionic/angular';
+import { Stories } from '../interfaces/stories';
 
 @Component({
   selector: 'app-stories-modal',
@@ -6,9 +8,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
   styleUrls: ['./stories-modal.page.scss'],
 })
 export class StoriesModalPage implements OnInit {
-  @ViewChild('slides') public element: any;
+  @ViewChild('slides') public slides: IonSlides | any;
 
   public slideOpts = {
+    initialSlide: 0,
     grabCursor: true,
     effect: 'cube',
     cubeEffect: {
@@ -19,8 +22,7 @@ export class StoriesModalPage implements OnInit {
     },
     on: {
       beforeInit: (): void => {
-        const swiper: any = this.element.el.swiper;
-        console.log('beforeInit', swiper);
+        const swiper: any = this.slides.el.swiper;
         swiper.classNames.push(`${swiper.params.containerModifierClass}cube`);
         swiper.classNames.push(`${swiper.params.containerModifierClass}3d`);
 
@@ -43,7 +45,7 @@ export class StoriesModalPage implements OnInit {
         // swiper.params = overwriteParams;
       },
       setTranslate: (): void => {
-        const swiper: any = this.element.el.swiper;
+        const swiper: any = this.slides.el.swiper;
         const {
           $el,
           $wrapperEl,
@@ -206,7 +208,7 @@ export class StoriesModalPage implements OnInit {
         $el.find('.swiper-wrapper').transition(this.isDrag ? 100 : 300);
       },
       setTransition: (duration): void => {
-        const swiper: any = this.element.el.swiper;
+        const swiper: any = this.slides.el.swiper;
         const { $el, slides } = swiper;
         slides
           .transition(duration)
@@ -222,15 +224,146 @@ export class StoriesModalPage implements OnInit {
   };
 
   isDrag: boolean; // ドラッグ中からの取得
+  isPause: boolean; // ポーズ中
+  isRestart: boolean; // CSSアニメーションリスタート
+  stories: Stories[] = [];
+  activeIndex = 0;
+  activeItemIndex = 0;
+  progressCount = 0;
 
-  constructor() {}
+  constructor(
+    public modalCtrl: ModalController,
+    public navParams: NavParams,
+    public el: ElementRef
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.stories = this.navParams.get('stories');
+    this.activeIndex = this.navParams.get('idx');
+    this.slideOpts.initialSlide = this.activeIndex;
+  }
 
   slideStart() {
     this.isDrag = true;
   }
   slideEnd() {
     this.isDrag = false;
+  }
+
+  // ストーリーズを閉じる
+  close() {
+    this.modalCtrl.dismiss();
+  }
+
+  // プログレスバーのアニメーション終了時に動く関数
+  onAnimationEnd() {
+    this.nextItem();
+  }
+
+  // 次のアイテムへの遷移
+  async nextItem() {
+    this.activeItemIndex++;
+    if (this.stories[this.activeIndex].items.length <= this.activeItemIndex) {
+      if (await this.slides.isEnd()) {
+        this.close();
+      }
+      this.nextStory();
+    } else {
+      this.playVideo();
+    }
+  }
+
+  // 次のユーザーのストーリへ遷移
+  async nextStory() {
+    console.log(this.slides);
+    this.slides.slideNext();
+    this.activeIndex++;
+    this.activeItemIndex = 0;
+    this.playVideo();
+  }
+
+  // 動画のメタデータ読み込み
+  loadVideo(ev, item) {
+    console.log('loadVideo', ev, item);
+    if (ev.target.duration) {
+      item.length = ev.target.duration;
+      this.playVideo();
+    }
+  }
+
+  // 動画の再生
+  playVideo() {
+    const item = this.stories[this.activeIndex].items[this.activeItemIndex];
+    if (item.type === 'video') {
+      const el = this.el.nativeElement.querySelector('#video' + item.id);
+      if (el) {
+        el.play();
+      }
+    }
+  }
+
+  // 動画の停止
+  pauseVideo() {
+    const item = this.stories[this.activeIndex].items[this.activeItemIndex];
+    if (item.type === 'video') {
+      const el = this.el.nativeElement.querySelector('#video' + item.id);
+      if (el) {
+        el.pause();
+      }
+    }
+  }
+
+  // プログレスバーの停止
+  pause() {
+    this.pauseVideo();
+    this.isPause = true;
+  }
+
+  // プログレスバーの再開
+  resume() {
+    this.playVideo();
+    this.isPause = false;
+  }
+
+  async slideNextEnd() {
+    this.activeIndex = await this.slides.getActiveIndex();
+    this.activeItemIndex = 0;
+    this.playVideo();
+    console.log(
+      'slideNextEnd()',
+      this.isPause,
+      this.activeIndex,
+      this.activeItemIndex
+    );
+  }
+
+  async slidePrevEnd() {
+    this.activeIndex = await this.slides.getActiveIndex();
+    this.activeItemIndex = 0;
+    this.playVideo();
+    console.log(
+      'slidePrevEnd()',
+      this.isPause,
+      this.activeIndex,
+      this.activeItemIndex
+    );
+  }
+
+  async slideDidChange() {
+    this.activeIndex = await this.slides.getActiveIndex();
+    console.log(
+      'slideDidChange()',
+      this.isPause,
+      this.activeIndex,
+      this.activeItemIndex
+    );
+    this.restartAnimation();
+  }
+
+  restartAnimation() {
+    this.isRestart = true;
+    setTimeout(() => {
+      this.isRestart = false;
+    }, 50);
   }
 }

@@ -1,17 +1,25 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title> Blank </ion-title>
+    <ion-title> Ionic Angular Stories UI </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <ion-button (click)="showModal()">Show</ion-button>
+  <div id="stories" class="stories-wrapper">
+    <div
+      class="story"
+      *ngFor="let story of stories; let idx = index"
+      tappable
+      (click)="showModal($event, idx)"
+    >
+      <div class="item-link">
+        <span class="item-preview">
+          <img [src]="story.photo" />
+        </span>
+        <span class="info">
+          <strong>{{story.name}}</strong>
+        </span>
+      </div>
+    </div>
   </div>
 </ion-content>

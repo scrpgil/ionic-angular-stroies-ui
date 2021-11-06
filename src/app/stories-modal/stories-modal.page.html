@@ -1,28 +1,82 @@
 <ion-content fullscreen scroll-y="false">
-  <ion-slides #slides [options]="slideOpts" (ionSlideDrag)="slideStart()" (ionSlideTouchEnd)="slideEnd()">
-    <ion-slide>
-      <h1>Slide1</h1>
-    </ion-slide>
-
-    <ion-slide>
-      <h1>Slide2</h1>
-    </ion-slide>
-
-    <ion-slide>
-      <h1>Slide3</h1>
-    </ion-slide>
-
-    <ion-slide>
-      <h1>Slide4</h1>
-    </ion-slide>
-    <ion-slide>
-      <h1>Slide5</h1>
-    </ion-slide>
-    <ion-slide>
-      <h1>Slide6</h1>
-    </ion-slide>
-    <ion-slide>
-      <h1>Slide7</h1>
+  <ion-slides
+    #slides
+    [options]="slideOpts"
+    (ionSlideDrag)="slideStart()"
+    (ionSlideTouchEnd)="slideEnd()"
+    (ionSlideNextEnd)="slideNextEnd()"
+    (ionSlidePrevEnd)="slidePrevEnd()"
+    (ionSlideDidChange)="slideDidChange()"
+  >
+    <ion-slide *ngFor="let story of stories; let storyIdx = index">
+      <div
+        class="story-viewer"
+        (touchstart)="pause()"
+        (touchend)="resume()"
+        (mousedown)="pause()"
+        (mouseup)="resume()"
+      >
+        <div class="story-progress-bar">
+          <div
+            class="progress-bar"
+            *ngFor="
+              let item of story.items;
+              let progressIdx = index
+            "
+          >
+            <div
+              class="progress-bar-white"
+              [class.runninng]="!isPause && progressIdx === activeItemIndex && storyIdx === activeIndex"
+              [class.viewing]="progressIdx < activeItemIndex && storyIdx === activeIndex"
+              [class.restart]="isRestart"
+              [style.animation-duration]="item.length + 's'"
+              (animationend)="onAnimationEnd()"
+            ></div>
+          </div>
+        </div>
+        <div class="head">
+          <div class="left">
+            <ion-icon
+              class="back-icon"
+              (click)="close()"
+              name="chevron-back-outline"
+            ></ion-icon>
+            <span class="item-preview">
+              <img lazy="eager" class="profilePhoto" [src]="story.photo" />
+            </span>
+            <div class="info">
+              <strong class="name">{{story.name}}</strong>
+            </div>
+          </div>
+        </div>
+        <div class="items">
+          <div
+            class="item"
+            *ngFor="let item of story.items; let idx = index;"
+            [class.active-item]="activeItemIndex === idx"
+          >
+            <img
+              *ngIf="item.type === 'photo'"
+              loading="auto"
+              class="media"
+              [src]="item.src"
+            />
+            <video
+              *ngIf="item.type === 'video'"
+              [class]="'media video' + item.id"
+              [id]="'video' + item.id"
+              webkit-playsinline=""
+              playsinline=""
+              preload="auto"
+              [src]="item.src"
+              [poster]="item.preview"
+              (load)="loadVideo($event, item)"
+              (loadedmetadata)="loadVideo($event, item)"
+              video=""
+            ></video>
+          </div>
+        </div>
+      </div>
     </ion-slide>
   </ion-slides>
 </ion-content>

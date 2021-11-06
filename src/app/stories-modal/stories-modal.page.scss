@@ -1,9 +1,148 @@
+@keyframes progressbar-countdown {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
 ion-slides {
   height: 100%;
 
   ion-slide {
-    background-color: #fff;
+    background-color: #000;
     color: #000;
+    height: 100%;
+
+    .story-viewer {
+      height: 100%;
+
+      .story-progress-bar {
+        display: flex;
+        padding: 8px 8px 0;
+        justify-content: space-between;
+        width: 100%;
+        border-radius: 2px;
+        width: 100%;
+        left: 0;
+        top: 0;
+        position: absolute;
+        z-index: 10000;
+
+        .progress-bar {
+          background-color: rgba(255, 255, 255, 0.6);
+          width: 100%;
+          margin: 0 2px;
+          border-radius: 2px;
+
+          .progress-bar-white {
+            background-color: #fff;
+            height: 2px;
+            border-radius: 2px;
+            width: 0;
+            animation: progressbar-countdown;
+            animation-play-state: paused;
+            animation-timing-function: linear;
+          }
+
+          .runninng {
+            animation-play-state: running;
+          }
+
+          .viewing {
+            width: 100%;
+          }
+
+          .restart {
+            animation: "";
+          }
+        }
+      }
+
+      .head {
+        position: absolute;
+        height: 56px;
+        left: 0;
+        right: 0;
+        line-height: 56px;
+        z-index: 100010;
+        color: #fff;
+        font-size: 14px;
+        text-align: left;
+        padding: 6px 12px;
+
+        .item-preview {
+          overflow: hidden;
+          vertical-align: top;
+          background-size: cover;
+          width: 42px;
+          height: 42px;
+          display: inline-block;
+          margin-right: 9px;
+          border-radius: 50%;
+          vertical-align: middle;
+          background-repeat: no-repeat;
+          background-position: center;
+
+          img,
+          video {
+            display: block;
+            box-sizing: border-box;
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            object-fit: cover;
+          }
+        }
+
+        .left {
+          display: inline-block;
+          margin: 6px 0;
+          .back-icon {
+            display: inline-block;
+            vertical-align: middle;
+            font-weight: 700;
+            font-size: 24px;
+          }
+          .info {
+            display: inline-block;
+            vertical-align: middle;
+            .name {
+              font-weight: 500;
+            }
+          }
+        }
+      }
+      .close-button {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .item {
+        position: absolute;
+        left: 0;
+        margin: auto;
+        height: 100%;
+        width: 100%;
+        z-index: 10;
+
+        .media {
+          display: block;
+          box-sizing: border-box;
+          width: 100%;
+          height: 100%;
+          background-size: cover;
+          background-position: center;
+          object-fit: cover;
+        }
+      }
+
+      .active-item {
+        z-index: 20;
+      }
+    }
   }
 
   .swiper-wrapper {
