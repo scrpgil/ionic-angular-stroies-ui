@@ -15,6 +15,7 @@
         (touchend)="resume()"
         (mousedown)="pause()"
         (mouseup)="resume()"
+        (click)="itemClick($event)"
       >
         <div class="story-progress-bar">
           <div
@@ -53,7 +54,7 @@
           <div
             class="item"
             *ngFor="let item of story.items; let idx = index;"
-            [class.active-item]="activeItemIndex === idx"
+            [class.active-item]="activeItemIndex === idx && storyIdx === activeIndex"
           >
             <img
               *ngIf="item.type === 'photo'"
@@ -68,6 +69,7 @@
               webkit-playsinline=""
               playsinline=""
               preload="auto"
+              muted
               [src]="item.src"
               [poster]="item.preview"
               (load)="loadVideo($event, item)"

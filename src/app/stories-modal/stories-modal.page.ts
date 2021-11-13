@@ -9,6 +9,14 @@ import { Stories } from '../interfaces/stories';
 })
 export class StoriesModalPage implements OnInit {
   @ViewChild('slides') public slides: IonSlides | any;
+  curentVideoEle: HTMLVideoElement; // ビデオ表示
+  isDrag: boolean; // ドラッグ中からの取得
+  isPause: boolean; // ポーズ中
+  isRestart: boolean; // CSSアニメーションリスタート
+  stories: Stories[] = [];
+  activeIndex = 0;
+  activeItemIndex = 0;
+  progressCount = 0;
 
   public slideOpts = {
     initialSlide: 0,
@@ -42,7 +50,6 @@ export class StoriesModalPage implements OnInit {
           swiper.originalParams,
           overwriteParams
         );
-        // swiper.params = overwriteParams;
       },
       setTranslate: (): void => {
         const swiper: any = this.slides.el.swiper;
@@ -223,14 +230,6 @@ export class StoriesModalPage implements OnInit {
     },
   };
 
-  isDrag: boolean; // ドラッグ中からの取得
-  isPause: boolean; // ポーズ中
-  isRestart: boolean; // CSSアニメーションリスタート
-  stories: Stories[] = [];
-  activeIndex = 0;
-  activeItemIndex = 0;
-  progressCount = 0;
-
   constructor(
     public modalCtrl: ModalController,
     public navParams: NavParams,
@@ -273,18 +272,24 @@ export class StoriesModalPage implements OnInit {
     }
   }
 
+  // 前のアイテムへの遷移
+  async prevItem() {
+    this.activeItemIndex--;
+    if (this.activeItemIndex < 0) {
+      this.activeItemIndex = 0;
+    }
+    this.playVideo();
+    this.restartAnimation();
+  }
+
   // 次のユーザーのストーリへ遷移
   async nextStory() {
-    console.log(this.slides);
     this.slides.slideNext();
-    this.activeIndex++;
-    this.activeItemIndex = 0;
     this.playVideo();
   }
 
   // 動画のメタデータ読み込み
   loadVideo(ev, item) {
-    console.log('loadVideo', ev, item);
     if (ev.target.duration) {
       item.length = ev.target.duration;
       this.playVideo();
@@ -294,10 +299,21 @@ export class StoriesModalPage implements OnInit {
   // 動画の再生
   playVideo() {
     const item = this.stories[this.activeIndex].items[this.activeItemIndex];
-    if (item.type === 'video') {
+    if (item && item.type === 'video') {
       const el = this.el.nativeElement.querySelector('#video' + item.id);
       if (el) {
         el.play();
+        if (this.curentVideoEle) {
+          this.curentVideoEle.pause();
+          this.curentVideoEle.currentTime = 0;
+        }
+        this.curentVideoEle = el;
+      }
+    } else {
+      if (this.curentVideoEle) {
+        this.curentVideoEle.pause();
+        this.curentVideoEle.currentTime = 0;
+        this.curentVideoEle = null;
       }
     }
   }
@@ -329,34 +345,16 @@ export class StoriesModalPage implements OnInit {
     this.activeIndex = await this.slides.getActiveIndex();
     this.activeItemIndex = 0;
     this.playVideo();
-    console.log(
-      'slideNextEnd()',
-      this.isPause,
-      this.activeIndex,
-      this.activeItemIndex
-    );
   }
 
   async slidePrevEnd() {
     this.activeIndex = await this.slides.getActiveIndex();
     this.activeItemIndex = 0;
     this.playVideo();
-    console.log(
-      'slidePrevEnd()',
-      this.isPause,
-      this.activeIndex,
-      this.activeItemIndex
-    );
   }
 
   async slideDidChange() {
     this.activeIndex = await this.slides.getActiveIndex();
-    console.log(
-      'slideDidChange()',
-      this.isPause,
-      this.activeIndex,
-      this.activeItemIndex
-    );
     this.restartAnimation();
   }
 
@@ -365,5 +363,13 @@ export class StoriesModalPage implements OnInit {
     setTimeout(() => {
       this.isRestart = false;
     }, 50);
+  }
+
+  itemClick(ev) {
+    if (window.outerWidth / 2 >= ev.clientX) {
+      this.prevItem();
+    } else {
+      this.nextItem();
+    }
   }
 }

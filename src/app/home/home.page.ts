@@ -20,8 +20,9 @@ export class HomePage {
     this.stories = this.storiesServie.getStories();
   }
 
+  // モーダル作成
   async showModal(ev: any, idx: number) {
-    const enterAnimation = this.createMyFadeInAnimation();
+    const enterAnimation = this.createMyFadeInAnimation(ev);
     const modal = await this.modalController.create({
       component: StoriesModalPage,
       swipeToClose: true,
@@ -38,41 +39,26 @@ export class HomePage {
     return await modal.present();
   }
 
-  createMyFadeInAnimation() {
-    // const myFadeInAnimation = (baseEl: any) => {
-    //   const backdropAnimation = this.animationCtrl
-    //     .create()
-    //     .addElement(baseEl.querySelector('ion-backdrop'))
-    //     .fromTo('opacity', 0.01, 0.4);
-    //   const wrapperAnimation = this.animationCtrl
-    //     .create()
-    //     .addElement(baseEl.querySelector('.modal-wrapper'))
-    //     .beforeStyles({ opacity: 1 })
-    //     .fromTo('translateX', '0%', '0%');
-    //   return this.animationCtrl
-    //     .create()
-    //     .addElement(baseEl)
-    //     .easing('cubic-bezier(0.36,0.66,0.04,1)')
-    //     .duration(1000)
-    //     .beforeAddClass('show-modal')
-    //     .addAnimation([backdropAnimation, wrapperAnimation]);
-    // };
+  // モーダルのアニメーション追加
+  createMyFadeInAnimation(ev) {
     const enterAnimation = (baseEl: any) => {
       const backdropAnimation = this.animationCtrl
         .create()
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .addElement(baseEl.querySelector('ion-backdrop')!)
+        .addElement(baseEl.querySelector('ion-backdrop'))
         .fromTo('opacity', '0.01', 'var(--backdrop-opacity)');
+
+      // モーダルの最初の位置を計算
+      const x = ev.clientX - Math.round(window.outerWidth / 2);
+      const y = ev.clientY - Math.round(window.outerHeight / 2);
 
       const wrapperAnimation = this.animationCtrl
         .create()
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .addElement(baseEl.querySelector('.modal-wrapper')!)
+        .addElement(baseEl.querySelector('.modal-wrapper'))
         .keyframes([
           {
             offset: 0,
             opacity: '0.2',
-            transform: `translate(0) scale(0)`,
+            transform: `translate(${x}px, ${y}px) scale(0)`,
           },
           {
             offset: 1,
@@ -84,8 +70,8 @@ export class HomePage {
       return this.animationCtrl
         .create()
         .addElement(baseEl)
-        .easing('ease-in')
-        .duration(150)
+        .easing('ease-out')
+        .duration(300)
         .addAnimation([backdropAnimation, wrapperAnimation]);
     };
     return enterAnimation;
