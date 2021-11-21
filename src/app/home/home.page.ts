@@ -57,7 +57,7 @@ export class HomePage {
         .keyframes([
           {
             offset: 0,
-            opacity: '0.2',
+            opacity: '1',
             transform: `translate(${x}px, ${y}px) scale(0)`,
           },
           {
